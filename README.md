@@ -9,6 +9,5 @@ puzzles.  In the second phase we will add back-tracking
 search to solve harder puzzles. 
 
 We will use a model-view-controller organization to 
-associate either a graphical display or a textual 
-display with the game. 
+associate a graphical display with the game. 
 
