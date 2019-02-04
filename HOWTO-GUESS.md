@@ -276,3 +276,31 @@ Here's a test case that requires guess-and-check to solve:
 
 
 
+# Recap
+
+To add recursive guess-and-check to our Sudoko solver, 
+we completed the following steps: 
+
+* Refactored the ```solve``` method.  The old ```solve```
+is now one step of the new ```solve```.  We move almost 
+all of its logic into ```propagate``` and leave 
+just a call to ```propagate```. 
+
+* The next several steps were preparation 
+for building the new logic of 'solve':
+    * We wrote a method to select the tile 
+    with the minimum number of candidates. 
+    * We wrote a method to make a copy 
+    of the board state as a list of strings, 
+    so that we can use it together with 
+    ```set_tiles``` to save and restore board state. 
+    We got this by refactoring the ```__str__``` method. 
+    * We write a method to determine whether 
+    the board is complete.  Together with 
+    ```is_consistent```, this method can tell us 
+    whether the board has been solved. 
+
+* Then we used the building blocks to 
+create the new logic of ```solve```, 
+recursively searching for a complete 
+puzzle solution.  
