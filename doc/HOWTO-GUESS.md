@@ -142,7 +142,7 @@ it is a solution (and is_consistent returns True) or it
 contains bad choices.  The worst that can happen is that 
 we might continue to make guesses when we should recognize that 
 the board is unsolvable.  So if naked single or hidden single eliminate
-some canidates or choose some tile values that they shouldn't, 
+some candidates or choose some tile values that they shouldn't, 
 it might slow the solver down, but it won't break it. 
 
 We can't have an infinite loop because the board will be filled up 
@@ -164,7 +164,39 @@ number of candidates.   Its header might look like this:
         """
 ```
 
-I'll leave the code to you. 
+I'll leave the code to you.   How shall we test it?  
+It's easy to to check that the returned tile has value 
+UNKNOWN.   Testing that it is among the UNKNOWN tiles with 
+a minimum number of candidates is a little harder, but we 
+can do it by creating a board with a single best choice: 
+
+```python
+    def test_choose_min_tile(self):
+        board = Board()
+        # We want a predictable, single "best" tile to be chosen,
+        # so we'll create a board in which all the 'unknown' tiles
+        # have many candidates but exactly one tile has exactly
+        # two candidates. It will be easiest to see this if we
+        # lay out the board as a matrix.
+        board.set_tiles(["....5....",
+                         "....4....",
+                         ".........",
+                         ".........",
+                         "123....89",
+                         ".........",
+                         ".........",
+                         ".........",
+                         "........."])
+        # Tile (4,4) should have just 6,7 as candidates.
+        # First we have to remove others with naked_single
+        board.naked_single()
+        # Then we can make the choice.
+        tile = board.min_tile()
+        self.assertEqual(tile.value, ".")
+        self.assertEqual(tile.row, 4)
+        self.assertEqual(tile.col, 4)
+        self.assertEqual(tile.candidates, set(["6", "7"]))
+```
 
 ## Saving and restoring state 
 

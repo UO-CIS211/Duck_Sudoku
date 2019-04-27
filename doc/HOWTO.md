@@ -3,9 +3,10 @@
 Sudoku is a popular logic-based number placement puzzle.
 For an example
 and a bit of history, see
-[the Wikipeda article](http://en.wikipedia.org/wiki/Sudoku)  One of the interesting bits of history is the role of
+[the Wikipeda article](http://en.wikipedia.org/wiki/Sudoku)  
+One of the interesting bits of history is the role of
   of a Sudoku puzzle generating program in popularizing Sudoku.
-  Creating good puzzles is much harder than solving them!
+  Creating good puzzles is harder than solving them!
 
 Your program will read a Sudoku board that may be partially
   completed.  A board file contains 9 lines of 9 symbols, each of
@@ -539,7 +540,7 @@ class Board(object):
     def __init__(self):
         """The empty board"""
         # Row/Column structure: Each row contains columns
-        self.tiles: List[Tile] = [ ]
+        self.tiles: List[List[Tile]] = [ ]
         for row in range(NROWS):
             cols = [ ]
             for col in range(NCOLS):
@@ -816,12 +817,66 @@ class TestBoardGroups(unittest.TestCase):
 
 The test case is not perfect.  It's conceivable that I could 
 mess up the group formation and still pass the test.  But it's
-good enough to give me enough confidence to go on. 
+good enough to give me enough confidence to go on.  
+
+Or so I thought.  In Winter 2019, many student projects passed this 
+test but failed later tests because they created duplicate groups. 
+Each tile appeared in exactly three groups, but two of those three 
+were duplicates!   One of the ways we design test cases is by 
+observing prior failures (especially those that were difficult to debug, 
+or managed to slip through to the product as shipped to users) and 
+devise test cases designed to catch those particular errors or 
+errors very much like them.  So, I need to add a test case for 
+detecting a group that contains the same Tile objects as any 
+other group.  How? 
+
+The obvious approach to checking for duplicates is to build a 
+dictionary.  Unfortunately, though, lists cannot be dict keys, 
+because they are mutable: 
+
+```
+d = { }
+d[[1, 2, 3]] = "forbidden"
+Traceback (most recent call last):
+  File "<input>", line 1, in <module>
+TypeError: unhashable type: 'list'
+```
+
+Moreover, the list of tiles wouldn't make a good key even if I 
+could use it, because I want "duplicate" to mean "contains the same tiles", 
+even if they are in a different order. 
+
+What I want is a fingerprint for a group that depends only its contents, 
+regardless of order.  Each object in Python, such as a Tile object, 
+has a "hash" value that can serve as a fingerprint for that object. 
+It is possible for two distinct objects to have the same hash, but 
+it is extremely unlikely.  The sum of the hashes of the tiles in a 
+group is therefore also very unlikely to match the sum of the hashes
+of tiles in any other group, unless the two groups contain the 
+same tiles.   I will exploit this to build a pretty good, pretty 
+simple test case: 
+
+```python
+    def test_groups_are_distinct(self):
+        """Each group should contain a distinct set of tiles.
+        (A frequent bug in Winter 2019 CIS 211.)
+        """
+        board = Board()
+        groups_by_hash = { }
+        for group in board.groups:
+            hash_sum = 0
+            for tile in group:
+                hash_sum += hash(tile)
+            self.assertNotIn(hash_sum, groups_by_hash,
+                             msg=f"Oh no, group {group} is a duplicate!")
+            groups_by_hash[hash_sum] = group
+```
 
 ## Detecting duplicates (again)
 
 Now that we have a list of 'groups', we can revisit the 
-algorithm we sketched before: 
+algorithm we sketched before for detecting duplicate values in 
+rows, columns, or blocks: 
 
 ``` 
 for each group (row, column, or block): 
@@ -900,7 +955,12 @@ class TestConsistent(unittest.TestCase):
 There are many tactics for inferring the value a tile must 
 take.  We will use two of the most basic tactics described at
 http://www.sadmansoftware.com/sudoku/solvingtechniques.php . 
-
+You may also find it useful to review the *pencil marks* 
+technique that many people use to keep track of possible 
+tile values, because our *candidates* structure is essentially
+a Python representation of pencil marks;  
+https://www.learn-sudoku.com/pencil-marks.html is a good 
+introduction. 
 
 ## Naked Single
 
