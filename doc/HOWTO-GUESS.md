@@ -191,7 +191,7 @@ can do it by creating a board with a single best choice:
         # First we have to remove others with naked_single
         board.naked_single()
         # Then we can make the choice.
-        tile = board.min_tile()
+        tile = board.min_choice_tile()
         self.assertEqual(tile.value, ".")
         self.assertEqual(tile.row, 4)
         self.assertEqual(tile.col, 4)
