@@ -1,5 +1,85 @@
 # Sudoku Solver
 
+## Outline 
+
+This HOWTO covers the first part of a two-part 
+Sudoku project.  In this part you will construct
+a solver that uses *constraint propagation* to 
+solve simple puzzles.  In the second (and easier)
+part, you will use the constraint propagation 
+solver as one part of a solver that performs 
+recursive guess-and-check search to solve 
+*all* Sudoku puzzles.  The second week part is 
+designed to be easier because it is the week 
+of the CIS 211 midterm exam. 
+
+The instructions below begin with a description 
+of Sudoku and of the solving strategy.  
+Don't skip it, because the step-by-step 
+instructions that follow won't make sense 
+if you can't see where you are going. The 
+step-by-step instructions begin in a section 
+titled "Step 1", which is creating the 
+Sudoku `Board` class.  It also describes how
+to set up *logging* (very helpful in debugging), 
+and once again we set up a Model-View-Controller
+structure so that we can have a graphical 
+view of the puzzle being solved. 
+
+As in the FiveTwelve project, you will create a 
+`Tile` class and a `Board` class, and a `Board` 
+object will contain a list of lists of 
+`Tile` objects.  The `Tile` objects for 
+Sudoku are a good deal more complex than the 
+`Tile` objects in FiveTwelve.  Each tile keeps 
+track not only of the symbol it currently 
+holds, but also of the symbols it *could* hold, 
+constrained by the symbols currently held by 
+other tiles in the same row, column, or block. 
+
+A `Board` object will not only include a list
+of lists of `Tile` objects, but will also 
+contain a list containing lists of subsets of the tiles 
+grouped in different ways.  You must devise 
+part of the code to build these lists.  To 
+understand what this structure is and why 
+we are building it, be sure to read the 
+[supplement on aliasing](https://uo-cis211.github.io/chapters/04_1_Alias).
+
+You will also write a method `is_consistent` 
+that determines whether a Sudoku board contains
+any duplicate digits in a row, column, or block. 
+
+The next part (in the section *Inferring Values*)
+begins to provide the constraint propagation logic
+used to solve simple puzzles.  You will write 
+a method `naked_single` that implements a basic
+solution tactic.  At this point you will have 
+a working solver that can solve  
+some very simple Sudoku puzzles. 
+
+Next you will implement a tactic called 
+*hidden single*.  I will provide you some 
+high level pseudocode and guidance, but you 
+will write the method.  When you have 
+implemented method `hidden_single` as well as 
+`naked_single`, you will have a complete 
+solver for most of the Sudoku problems 
+you find online that are marked *easy*. 
+
+Although the solver you build this week will 
+not be able to completely solve many Sudoku 
+puzzles ranked intermediate or hard, it is the 
+major part of a complete solver that you will 
+complete the following week.  Essentially
+next week's project will perform a 
+systematic, recursive *guess-and-check* 
+algorithm, and this week's project will be 
+the *check* part as well as a major component
+of the *guess* part. 
+
+## Sudoku 
+
 Sudoku is a popular logic-based number placement puzzle.
 For an example
 and a bit of history, see
