@@ -5,8 +5,11 @@ techniques, you have a solver that can very quickly solve
 some puzzles.  However, there are other puzzles that it just 
 can't solve. 
 
-We could add a bunch of other solution techniques: XY-Wing, Swordfish, 
-Forcing Chains, etc.   Or we could resort to *guess-and-check*, also known 
+We could add a bunch of other solution techniques: 
+[XY-Wing](http://www.sadmansoftware.com/sudoku/xywing.php), 
+[Swordfish](http://www.sadmansoftware.com/sudoku/swordfish.php), 
+[Forcing Chains](http://www.sadmansoftware.com/sudoku/forcingchain.php), 
+etc.   Or we could resort to *guess-and-check*, also known 
 as *trial and error* or *brute force*.
 
 By itself, guess-and-check can solve any Sudoku puzzle, but it 
@@ -17,7 +20,7 @@ would make all the right guesses and solve the board.  The
 number of guesses we would have to make could, at worst, be 
 an exponential function of the number of tiles with unknown values. 
 
-Consider the most brutish of brute force techqniques:  We could simply
+Consider the most brutish of brute force techniques:  We could simply
 make a guess for each of the unknown tiles, using no other 
 information.   How many guesses are possible?  Suppose there are 
 *20* open tiles and 9 choices; that is *9^20* potential combinations, 
@@ -302,11 +305,6 @@ Here's a test case that requires guess-and-check to solve:
                     "675319248", "814265937", "923748561",
                     "169472853", "758693124", "342581679"]
         self.assertEqual(board.as_list(), solution)
-
-
-
-
-
 
 # Recap
 
