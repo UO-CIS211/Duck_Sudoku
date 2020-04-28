@@ -289,6 +289,46 @@ CHOICES.  Its signature will look like this:
 ```
 I'll leave that code to you. 
 
+When I first gave this project as an assignment, 
+I thought `is_complete` was too simple to be 
+worth a test case.  I was wrong.  I saw many
+students spend a lot of time debugging other code
+when the real bug was in `is_complete`.  Even 
+simple code can be buggy!   Fortunately the 
+test cases can also be simple: 
+
+```python
+    def test_is_complete(self):
+        board = Board()
+        tiles_list = [
+            "687539124"
+            ,"243718965"
+            ,"951264387"
+            ,"419873652"
+            ,"725691438"
+            ,"836425791"
+            ,"394182576"
+            ,"168957243"
+            ,"572346819"]
+        board.set_tiles(tiles_list)
+        self.assertTrue(board.is_complete())
+
+    def test_is_not_complete(self):
+        board = Board()
+        tiles_list = [
+            "687539124"
+            , "243718965"
+            , "951264387"
+            , "419873652"
+            , "725691.38"
+            , "836425791"
+            , "394182576"
+            , "168957243"
+            , "572346819"]
+        board.set_tiles(tiles_list)
+        self.assertFalse(board.is_complete())
+``` 
+
 Now we have everything we need to turn that solver 
 pseudocode into Python code.  Which I'll also leave to you. 
 
@@ -334,3 +374,26 @@ for building the new logic of 'solve':
 create the new logic of ```solve```, 
 recursively searching for a complete 
 puzzle solution.  
+
+# Victory is ours! 
+
+We now have a Sudoku solver that can tackle the 
+toughest puzzles.  If we run it with the `-d` 
+option for graphics, sometimes it will seem quite 
+slow as it makes guesses, discovers they are wrong, 
+and tries other guesses.  Most of this slowness, 
+though, is in the graphics.  I dare you to find 
+a puzzle that it cannot solve in five seconds, 
+even on a slow laptop. 
+
+## Next steps
+
+There is no next step.  However, here's something 
+to think about:  How would you modify this program 
+so that instead of solving a puzzle, it generated 
+a good puzzle with exactly one solution?  Could you 
+make it generate puzzles at different levels of 
+difficulty?  Think in terms of extending the 
+recursive guess-and-check.  If you spend at least 
+an hour thinking about it, whether you solve it or 
+not, let's discuss it. 

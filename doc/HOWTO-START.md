@@ -465,6 +465,19 @@ class Board(object):
             self.tiles.append(cols)
 ```
 
+Note that we gave a type annotation on the 
+empty list of tiles.  Without the annotation, 
+PyCharm would only know that `self.tiles` is some 
+kind of list, and would not be able to warn
+us if we appended the wrong kind of 
+elements.  PyCharm will complain about this 
+annotation until we add another import
+at the beginning of the file: 
+
+```python
+from typing import List
+```
+
 We would like to be able to "load" a board from a list of lists, 
 as we did for FiveTwelve boards.  However, it is tedious to write 
 a value like 
@@ -496,15 +509,16 @@ type ```Sequence```, we will add
 from typing import Sequence
 ```
 
-Since we know we will be using the List and Set types as well, we might as 
-well expand it to 
+Since we also used the List type annotation 
+and we will soon at the Set type as well, 
+we might as well consolidate the imports: 
 
 ```python
 from typing import Sequence, List, Set
 ```
 
-
-near the beginning of the file and specify that any Sequence type 
+Then we can specify that any Sequence type, 
+including both `str` and `list`, 
 can be used to set the tile values: 
 
 ```python           
@@ -624,7 +638,7 @@ into Python, we notice that the line
 for each group (row, column, or block): 
 ```
 
-is really hard to program in a nice way.  Looping through the rows, and tiles in each row
+is really hard to program in a nice DRY way.  Looping through the rows, and tiles in each row
 is easy enough.  Looping through the columns is a bit more complex, but 
 not too bad.   Looping through the blocks is a good deal more 
 complex, but we can figure it out.   But how in the world do we 
@@ -638,7 +652,7 @@ is made doubly unattractive when we consider that we will almost
 certainly need to do something similar for each kind of solution 
 tactic we apply.   We want to apply multiple techniques that
 treat different kinds of groups (rows, columns, and blocks) in the 
-same way.  We don't want to duplicate each technique three times! 
+same way. We don't want to duplicate each technique three times!  
 
 ## Factoring out group formation
 
@@ -784,7 +798,8 @@ This hash value will be "random enough" for our purposes.
 group is therefore very unlikely to match the sum of the hashes
 of tiles in any other group, unless the two groups contain the 
 same tiles.   (This is not necessarily true of
-the default hash function based on memory address, as I learned the hard way.)  I will exploit this to build a pretty good, pretty 
+the default hash function based on memory address, 
+as I learned the hard way.)  I will exploit this to build a pretty good, pretty 
 simple test case: 
 
 ```python
@@ -802,7 +817,6 @@ simple test case:
                              msg=f"Oh no, group {group} is a duplicate!")
             groups_by_hash[hash_sum] = group
 ```
-
 
 ## Detecting duplicates (again)
 
@@ -881,3 +895,80 @@ class TestConsistent(unittest.TestCase):
                          ".........", ".........", "........."])
         self.assertFalse(board.is_consistent())
 ```
+
+Pro tip:  If your test cases fail, rejecting some consistent 
+boards as inconsistent, it helps to add some logging 
+to your `is_consistent` method.  The following statement 
+helped me: 
+
+```python
+   log.debug(f"Duplicate {tile.value} in {group}")
+```
+
+Of course yours could differ depending on the variable 
+names you use. 
+
+## Are we there yet?
+
+We almost have a running program, but looking in 
+`sudoku.py` we can see that our main program needs 
+one more method, called `solve`: 
+
+```python
+    if board.is_consistent():
+        board.solve()
+    else:
+        print("Board has duplicates; rejected")
+    print(board)
+```
+
+We can temporarily "stub out" this method in our `Board` 
+class: 
+
+```python
+    def solve(self):
+        """Solve the puzzle!"""
+        #FIXME: This will be added in the next step
+        return
+```
+
+Now we have a simple consistency checker.  If we execute it
+on a valid but incomplete board, it will simply print 
+that board: 
+
+``` 
+$ python3 sudoku.py data/00-nakedsubset1.sdk 
+32...14..
+9..4.2..3
+..6.7...9
+8.1..5...
+...1.6...
+...7..1.8
+1...9.5..
+2..8.4..7
+..45...31
+```
+
+If we execute it on an invalid board, it 
+will report the inconsistency: 
+
+ ``` 
+$ python3 sudoku.py data/bad.sdk 
+Board has duplicates; rejected
+435269781
+682571493
+197834562
+826195347
+374682915
+951743628
+519326874
+248957136
+963418257
+```
+
+## Onward! 
+
+Our [next step](HOWTO-PROPAGATE.md) will be to 
+replace our stubbed-out `solve` method 
+with a method that can actually solve 
+some puzzles using constraint propagation. 

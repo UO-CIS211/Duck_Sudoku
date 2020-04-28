@@ -4,59 +4,43 @@
 
 In this part you will construct
 a solver that uses *constraint propagation* to 
-solve simple puzzles.  In the second (and easier)
-part, you will use the constraint propagation 
+solve simple puzzles.  Later 
+you will use the constraint propagation 
 solver as one part of a solver that performs 
 recursive guess-and-check search to solve 
 *all* Sudoku puzzles.  
 
-The instructions below begin with a description 
-of Sudoku and of the solving strategy.  
-Don't skip it, because the step-by-step 
-instructions that follow won't make sense 
-if you can't see where you are going. The 
-step-by-step instructions begin in a section 
-titled "Step 1", which is creating the 
-Sudoku `Board` class.  It also describes how
-to set up *logging* (very helpful in debugging), 
-and once again we set up a Model-View-Controller
-structure so that we can have a graphical 
-view of the puzzle being solved. 
-
-As in the FiveTwelve project, you will create a 
-`Tile` class and a `Board` class, and a `Board` 
-object will contain a list of lists of 
-`Tile` objects.  The `Tile` objects for 
-Sudoku are a good deal more complex than the 
-`Tile` objects in FiveTwelve.  Each tile keeps 
-track not only of the symbol it currently 
-holds, but also of the symbols it *could* hold, 
-constrained by the symbols currently held by 
-other tiles in the same row, column, or block. 
-
-A `Board` object will not only include a list
-of lists of `Tile` objects, but will also 
-contain a list containing lists of subsets of the tiles 
-grouped in different ways.  You must devise 
-part of the code to build these lists.  To 
-understand what this structure is and why 
-we are building it, be sure to read the 
+Recall that when we created the `Board`
+object, we created not only the primary
+`tiles` list of lists, but also a list 
+of `groups` that contained the same 
+`Tile` objects grouped by row, column, 
+and block.  This simplified our consistency 
+check.  It is also crucial to the way we will 
+approach constraint propagation in this part 
+of the project. It is crucial to understand 
+that these are the very same `Tile` objects 
+*aliased* in multiple lists. 
+If this is not crystal clear to you, 
+be sure to read or re-read the 
 [supplement on aliasing](https://uo-cis211.github.io/chapters/04_1_Alias).
 
-You will also write a method `is_consistent` 
-that determines whether a Sudoku board contains
-any duplicate digits in a row, column, or block. 
-
-The next part (in the section *Inferring Values*)
-begins to provide the constraint propagation logic
-used to solve simple puzzles.  You will write 
+You will first write 
 a method `naked_single` that implements a basic
-solution tactic.  At this point you will have 
+solution tactic.  The *naked single* tactic 
+is based on the rule that a tile value may not 
+be duplicated in any row, column, or block. 
+When `naked_single` is working, you will have 
 a working solver that can solve  
 some very simple Sudoku puzzles. 
 
 Next you will implement a tactic called 
-*hidden single*.  I will provide you some 
+*hidden single*.   The hidden single tactic 
+is based on the rule that each symbol must 
+appear at least once in each column, row, 
+and block ... so if there is only one position 
+in which it can go, it must go in that position! 
+I will provide you some 
 high level pseudocode and guidance, but you 
 will write the method.  When you have 
 implemented method `hidden_single` as well as 
@@ -64,26 +48,10 @@ implemented method `hidden_single` as well as
 solver for most of the Sudoku problems 
 you find online that are marked *easy*. 
 
-Although the solver you build in this part will 
-not be able to completely solve many Sudoku 
-puzzles ranked intermediate or hard, it is the 
-major part of a complete solver.  The full solver
-performs a 
-systematic, recursive *guess-and-check* 
-algorithm.  This part performs the 
-*check* part and is a major component
-of the *guess* part. 
 
-
-## Completion with constraint propagation
-
-If the board is consistent, then (and only then) your program
-will apply two simple constraint propagation 
-tactics to fill some of the empty tiles,
-then print the resulting board.  These constraints are based
-directly on the properties of a completed Sudoku puzzle,
-viz., that each symbol must appear once but only once in each
-row, column, and block. 
+When a your constraint propagation solver cannot
+completely solve a puzzle, it may still be able 
+to fill in some tiles. 
 
 ```
 $ more data/board-sandiway-intermediate.sdk
@@ -96,6 +64,7 @@ $ more data/board-sandiway-intermediate.sdk
 ....2....
 ..98...36
 ...3.6.9.
+
 $ python3 sudoku.py data/board-sandiway-intermediate.sdk
 .2.6.8...
 58...97..
@@ -112,32 +81,6 @@ In the example above, only a few tiles have been filled in,
   because only simple tactics have been used.  If you use the
    --display option, you can see progress in filling in tiles,
   including elimination of some candidates:
-
-Constraint propagation alone is enough to solve
-some easy puzzles: 
-
-```
-$ more board-incomplete-easy1.sdk
-...26.7.1
-68..7..9.
-19...45..
-82.1...4.
-..46.29..
-.5...3.28
-..93...74
-.4..5..36
-7.3.18...
-$ python3 sudoku.py data/board-incomplete-easy1.sdk
-435269781
-682571493
-197834562
-826195347
-374682915
-951743628
-519326874
-248957136
-763418259
-```
 
 # Inferring Values
 
@@ -188,7 +131,7 @@ possible outcomes:
 It is most convenient to have the return value of the result 
 be an indicator of whether or not there was progress.  We can 
 treat the third possibility, an unsolvable puzzle, separately
-next week.  
+in the next stage of development.  
 
 We will add to the Tile class a method for eliminating 
 candidates and potentially changing the tile value from 
@@ -196,7 +139,7 @@ UNKNOWN to one of the CHOICES.  It will return an indication
 of whether the candidate list was changed: 
 
 ```python
-    def remove_candidates(self, used_values: Set[str]):
+    def remove_candidates(self, used_values: Set[str]) -> bool:
         """The used values cannot be a value of this unknown tile.
         We remove those possibilities from the list of candidates.
         If there is exactly one candidate left, we set the
@@ -254,13 +197,16 @@ class TestNakedSingle(unittest.TestCase):
 ## Solving a puzzle! 
 
 Although we have only a single, simple technique, we can 
-now solve some simple puzzles.  We will add a ```solve```
-method to ```Board``` that just calls ```naked_single``` 
+now solve some simple puzzles.  We will 
+replaced our stubbed-out ```solve```
+method in ```Board``` 
+with a method that just calls ```naked_single``` 
 again and again as long as the Naked Single tactic makes 
 some progress. 
 
 ```python
     def solve(self):
+        """Solve the puzzle!"""
         progress = True
         while progress:
             progress = self.naked_single()
@@ -279,6 +225,18 @@ can try
 operating system.)  If all is well, we should be able to watch 
 our Sudoku program solve a simple puzzle.
 
+With the `-d` option, our main program attaches 
+a graphical view to the Sudoku board, so that we 
+can watch as `naked_single` systematically
+removes candidate symbols until each tile has 
+only one possible value. 
+
+Beginning state: 
+![Board beginning state](img/ns-before.png)
+
+After solving: 
+![Board finished state](img/ns-after.png)
+
 Of course we should also do this in the form of a test case, without 
 graphical interaction: 
 
@@ -294,7 +252,6 @@ graphical interaction:
                          "\n".join(["435269781", "682571493", "197834562",
                                     "826195347", "374682915", "951743628",
                                     "519326874", "248957136", "763418259"]))
-
 ```
 
 ## Hidden Single
@@ -344,6 +301,19 @@ it into a set with
 ```python
     leftovers = set(CHOICES)
 ```
+
+The set data type has two operations for removing
+a element, `remove` and `discard`.  The `remove`
+operation raises an exception if the element is 
+not present in the set.  At this stage it will 
+work fine, because we solve only consistent puzzles,
+and in a consistent puzzle we should never attempt
+to remove the same value twice.  Later, though, 
+we will add guess-and-check, and some of our 
+guesses will be wrong.  Wrong guesses can lead 
+to inconsistent states.  I suggest using the 
+`discard` operation so that `hidden_single` will 
+not need revision when we add guessing. 
 
 Hidden single works only in combination with another tactic that eliminates candidates, 
 like naked single. Hidden single can only contribute progress if naked single makes 
@@ -404,21 +374,38 @@ class TestHiddenSingle(unittest.TestCase):
                                     "394182576", "168957243", "572346819"]))
 ```
 
-# Are we done?
-
-We are done for now.  With naked single and hidden single, our 
-Sudoku solver can handle all the puzzles that most online puzzle 
-sources rank as "easy".  Next week we will add recursive 
-guess-and-check to solve all other Sudoku puzzles, no matter how 
-hard. 
-
 ## Summary of your parts 
 
 Did you miss anything?  Here are the parts I left to you: 
 
-* Write the ```naked_single``` method
+* Write the `naked_single` method
 
-* Write the ```hidden_single``` method 
+* Write the `hidden_single` method 
+
+* Complete the `solve` method to repeatedly 
+  apply naked single and hidden single until 
+  it either solves the puzzle or gets stuck. 
+
+
+# What can we do now?
+
+With naked single and hidden single, our 
+Sudoku solver can handle all the puzzles that most online puzzle 
+sources rank as "easy".  For example: 
+
+```
+python3 sudoku.py -d data/nakedhiddensingle2.sdk
+```
+
+Takes this puzzle: 
+
+![Puzzle requiring naked single and hidden single](img/hs-before.png)
+
+And produces this result: 
+
+![Solution to the puzzle above](img/hs-after.png)
+
+
 
 ## Next steps
 
@@ -426,6 +413,10 @@ When your constraint propagation is working correctly, you
 are ready to add a 
 [guess-and-check procedure](HOWTO-GUESS.md) that will use 
 your constraint propagation as a step between guesses. 
+Combining constraint propagation with recursive 
+search will solve all Sudoku puzzles.  Theoretically there 
+must be some that it would solve very slowly (really, we can 
+prove that), but I have yet to find one. 
 
 
 
