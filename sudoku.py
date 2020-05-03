@@ -24,9 +24,13 @@ def main():
     args = cli()
     board = sdk_reader.read(args.file)
     if args.display:
-        display = sdk_display.Board(board, 800, 800)
+        display = sdk_display.Board(board, 600, 600)
+        # pause = input("Press enter to continue")
     if board.is_consistent():
+        if args.display:
+            input("Press enter to solve")
         board.solve()
+        assert board.is_consistent()
     else:
         print("Board has duplicates; rejected")
     print(board)
