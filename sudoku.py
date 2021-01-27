@@ -26,6 +26,7 @@ def main():
     if args.display:
         display = sdk_display.Board(board, 800, 800)
     if board.is_consistent():
+        input("Press enter to solve")
         board.solve()
     else:
         print("Board has duplicates; rejected")
