@@ -6,9 +6,7 @@ some puzzles.  However, there are other puzzles that it just
 can't solve. 
 
 We could add a bunch of other solution techniques: 
-[XY-Wing](http://www.sadmansoftware.com/sudoku/xywing.php), 
-[Swordfish](http://www.sadmansoftware.com/sudoku/swordfish.php), 
-[Forcing Chains](http://www.sadmansoftware.com/sudoku/forcingchain.php), 
+XY-Wing, Swordfish, Forcing Chains, 
 etc.   Or we could resort to *guess-and-check*, also known 
 as *trial and error* or *brute force*.
 
