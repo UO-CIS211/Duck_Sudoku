@@ -38,6 +38,8 @@ def read(f: Union[IOBase, str],
     values = []
     for row in f:
         row = row.strip()
+        if len(row) == 0:
+            continue
         log.debug(f"Reading row |{row}|")
         values.append(row)
         if len(row) != NROWS:
